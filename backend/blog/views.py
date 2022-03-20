@@ -4,12 +4,14 @@ from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
 
 from blog.models import Post, Comment
-from blog.serializers import PostSerializer, CommentWithPostSerializer, PostWithCommentsSerializer, CommentSerializer
+from blog.permissions import IsAuthorOrReadOnly
+from blog.serializers import PostSerializer, CommentWithChildrenSerializer, PostWithCommentsSerializer, CommentSerializer
 
 
 class PostViewSet(viewsets.ModelViewSet):
     queryset = Post.objects.all()
     serializer_class = PostSerializer
+    permission_classes = [IsAuthorOrReadOnly]
 
     def list(self, request):
         queryset = Post.objects.all()
@@ -22,18 +24,25 @@ class PostViewSet(viewsets.ModelViewSet):
         serializer = PostWithCommentsSerializer(post)
         return Response(serializer.data)
 
+    def perform_create(self, serializer):
+        serializer.save(author=self.request.user)
+
 
 class CommentViewSet(viewsets.ModelViewSet):
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
+    permission_classes = [IsAuthorOrReadOnly]
 
     def list(self, request):
         queryset = Comment.objects.all()
-        serializer = CommentWithPostSerializer(queryset, many=True)
+        serializer = CommentWithChildrenSerializer(queryset, many=True)
         return Response(serializer.data)
 
     def retrieve(self, request, pk=None):
         queryset = Comment.objects.all()
         comment = get_object_or_404(queryset, pk=pk)
-        serializer = CommentWithPostSerializer(comment)
+        serializer = CommentWithChildrenSerializer(comment)
         return Response(serializer.data)
+
+    def perform_create(self, serializer):
+        serializer.save(author=self.request.user)

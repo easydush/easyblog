@@ -27,8 +27,8 @@ class Post(models.Model):
 
 class Comment(models.Model):
     author = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
-    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='comments')
-    parent_comment = models.ForeignKey('Comment', on_delete=models.PROTECT)
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='comments', null=True)
+    parent_comment = models.ForeignKey('self', on_delete=models.PROTECT, related_name='children', null=True)
     text = models.TextField()
 
     def __str__(self):
