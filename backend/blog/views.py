@@ -25,7 +25,7 @@ class PostViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
     def perform_create(self, serializer):
-        serializer.save(author=self.request.user)
+        serializer.save(author=self.request.user.id)
 
 
 class CommentViewSet(viewsets.ModelViewSet):
@@ -45,4 +45,4 @@ class CommentViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
     def perform_create(self, serializer):
-        serializer.save(author=self.request.user)
+        serializer.save(author=self.request.user.id)
